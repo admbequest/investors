@@ -35,4 +35,4 @@ def handle_app_mention(event_data):
     client.chat_postMessage(channel=channel_id, text="Olá!")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=3000-4000)
