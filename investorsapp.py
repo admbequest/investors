@@ -28,6 +28,9 @@ def handle_app_mention(event_data):
     event = event_data["event"]
     channel_id = event["channel"]
 
+    # Adicionar mensagem de depuração
+    print("Evento de menção do aplicativo recebido!")
+
     # Enviar a resposta
     client.chat_postMessage(channel=channel_id, text="Olá!")
 
