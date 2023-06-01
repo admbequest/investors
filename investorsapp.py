@@ -36,5 +36,5 @@ def handle_app_mention(event_data):
 
 if __name__ == "__main__":
     # Iniciar o servidor usando o Gunicorn
-    app.run(host="0.0.0.0", port=3000-4000, threaded=True)
+    app.run(host="0.0.0.0", port=3000, threaded=True)
 
