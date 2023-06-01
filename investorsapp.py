@@ -1,6 +1,4 @@
-
-
-from investorsapp import Flask
+from flask import Flask, request
 from slackeventsapi import SlackEventAdapter
 from slack_sdk import WebClient
 import os
@@ -14,7 +12,7 @@ slack_bot_token = os.environ["SLACK_BOT_TOKEN"]
 client = WebClient(token=slack_bot_token)
 
 # Criar o objeto Flask
-app = Flask("investorsapp")
+app = Flask(__name__)
 
 # Rota para receber as solicitações do Slack
 @app.route("/slack/events", methods=["POST"])
