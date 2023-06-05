@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from slackeventsapi import SlackEventAdapter
 from slack_sdk import WebClient
 import os
@@ -17,6 +17,11 @@ app = Flask(__name__)
 # Rota para receber as solicitações do Slack
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
+    if "challenge" in request.json:
+        # Responder ao desafio do Slack
+        challenge = request.json["challenge"]
+        return jsonify({"challenge": challenge})
+    
     # Verificar se a solicitação é válida
     slack_events_adapter.handle(request)
 
@@ -37,4 +42,5 @@ def handle_app_mention(event_data):
 if __name__ == "__main__":
     # Iniciar o servidor usando o Gunicorn
     app.run(host="0.0.0.0", port=3000, threaded=True)
+
 
