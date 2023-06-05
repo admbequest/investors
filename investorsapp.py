@@ -1,3 +1,4 @@
+import os
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request
@@ -39,5 +40,6 @@ def handle_app_mention(event, say):
 if __name__ == "__main__":
     # Iniciar o servidor do Flask
     flask_app.run(host="0.0.0.0", port=3000)
+
 
 
