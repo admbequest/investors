@@ -1,25 +1,32 @@
-from flask import Flask, request, jsonify
 from slack_bolt import App
-import os
+from slack_bolt.adapter.flask import SlackRequestHandler
+from flask import Flask, request
 
-# Configurar o adaptador de eventos
-slack_signing_secret = os.environ["SLACK_SIGNING_SECRET"]
-app = App(signing_secret=slack_signing_secret)
+# Criar o objeto de aplicativo Flask
+flask_app = Flask(__name__)
+
+# Criar o objeto de aplicativo Slack Bolt
+app = App(token=os.environ["SLACK_BOT_TOKEN"], signing_secret=os.environ["SLACK_SIGNING_SECRET"], process_before_response=True)
+
+# Configurar o adaptador de solicitações do Slack para Flask
+handler = SlackRequestHandler(app)
 
 # Rota para receber as solicitações do Slack
-@app.route("/slack/events", methods=["POST"])
+@flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
-    data = request.json
+    # Obter a solicitação do Slack
+    slack_request = handler.handle(request)
 
-    if "challenge" in data:
-        # Responder ao desafio do Slack
-        challenge = data["challenge"]
-        return jsonify({"challenge": challenge})
+    # Verificar se a solicitação é uma verificação de evento
+    if slack_request.command == "/slack/events" and slack_request.body.get("type") == "url_verification":
+        return slack_request.body.get("challenge")
+
+    # Processar os eventos do Slack
+    response = app.dispatch(slack_request)
+    if response.status_code < 400:
+        return ""
     else:
-        # Verificar se a solicitação é válida
-        app.dispatch(request.data)
-
-    return "", 200
+        return response.body
 
 # Manipulador de eventos
 @app.event("app_mention")
@@ -27,10 +34,10 @@ def handle_app_mention(event, say):
     channel_id = event["channel"]
 
     # Enviar a resposta
-    say(f"Olá! Tudo bem?")
+    say("Olá! Tudo bem?")
 
 if __name__ == "__main__":
-    # Iniciar o servidor Flask
-    app.start(port=3000)
+    # Iniciar o servidor do Flask
+    flask_app.run(host="0.0.0.0", port=3000)
 
 
