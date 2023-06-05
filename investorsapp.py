@@ -17,14 +17,17 @@ app = Flask(__name__)
 # Rota para receber as solicitações do Slack
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
-    if "challenge" in request.json:
+    data = request.json
+
+    if "challenge" in data:
         # Responder ao desafio do Slack
-        challenge = request.json["challenge"]
+        challenge = data["challenge"]
         return jsonify({"challenge": challenge})
     else:
         # Verificar se a solicitação é válida
         slack_events_adapter.dispatch(request)
-        return "", 200
+
+    return "", 200
 
 # Manipulador de eventos
 @slack_events_adapter.on("app_mention")
@@ -32,14 +35,11 @@ def handle_app_mention(event_data):
     event = event_data["event"]
     channel_id = event["channel"]
 
-    # Adicionar mensagem de depuração
-    print("Evento de menção do aplicativo recebido!")
-
     # Enviar a resposta
     client.chat_postMessage(channel=channel_id, text="Olá!")
 
 if __name__ == "__main__":
-    # Iniciar o servidor usando o Gunicorn
-    app.run(host="0.0.0.0", port=3000, threaded=True)
+    # Iniciar o servidor Flask
+    app.run(host="0.0.0.0", port=3000)
 
 
