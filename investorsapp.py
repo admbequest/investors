@@ -21,11 +21,10 @@ def slack_events():
         # Responder ao desafio do Slack
         challenge = request.json["challenge"]
         return jsonify({"challenge": challenge})
-    
-    # Verificar se a solicitação é válida
-    slack_events_adapter.handle(request)
-
-    return "", 200
+    else:
+        # Verificar se a solicitação é válida
+        slack_events_adapter.dispatch(request)
+        return "", 200
 
 # Manipulador de eventos
 @slack_events_adapter.on("app_mention")
