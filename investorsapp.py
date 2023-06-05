@@ -1,18 +1,10 @@
 from flask import Flask, request, jsonify
-from slackeventsapi import SlackEventAdapter
-from slack_sdk import WebClient
+from slack_bolt import App
 import os
 
 # Configurar o adaptador de eventos
 slack_signing_secret = os.environ["SLACK_SIGNING_SECRET"]
-slack_events_adapter = SlackEventAdapter(slack_signing_secret, "/slack/events")
-
-# Configurar o cliente Slack
-slack_bot_token = os.environ["SLACK_BOT_TOKEN"]
-client = WebClient(token=slack_bot_token)
-
-# Criar o objeto Flask
-app = Flask(__name__)
+app = App(signing_secret=slack_signing_secret)
 
 # Rota para receber as solicitações do Slack
 @app.route("/slack/events", methods=["POST"])
@@ -25,21 +17,20 @@ def slack_events():
         return jsonify({"challenge": challenge})
     else:
         # Verificar se a solicitação é válida
-        slack_events_adapter.dispatch(request)
+        app.dispatch(request.data)
 
     return "", 200
 
 # Manipulador de eventos
-@slack_events_adapter.on("app_mention")
-def handle_app_mention(event_data):
-    event = event_data["event"]
+@app.event("app_mention")
+def handle_app_mention(event, say):
     channel_id = event["channel"]
 
     # Enviar a resposta
-    client.chat_postMessage(channel=channel_id, text="Olá!")
+    say(f"Olá! Tudo bem?")
 
 if __name__ == "__main__":
     # Iniciar o servidor Flask
-    app.run(host="0.0.0.0", port=3000)
+    app.start(port=3000)
 
 
