@@ -1,43 +1,45 @@
-import os
-from slack_bolt import App
-from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request, jsonify
+from flask import Flask, request, make_response
+from slack_sdk import WebClient
+from slack_sdk.signature import SignatureVerifier
+from slack_sdk.errors import SlackApiError
+import json
 
-# Criar o objeto de aplicativo Flask
-flask_app = Flask(__name__)
+app = Flask(__name__)
 
-# Criar o objeto de aplicativo Slack Bolt
-app = App(token=os.environ["SLACK_BOT_TOKEN"], signing_secret=os.environ["SLACK_SIGNING_SECRET"], process_before_response=True)
+# Substitua pelo seu token
+slack_token = 'SLACK_BOT_TOKEN'
+client = WebClient(token=slack_token)
 
-# Configurar o adaptador de solicitações do Slack para Flask
-handler = SlackRequestHandler(app)
+# Substitua pela sua signing secret
+signing_secret = 'SLACK_SIGNING_SECRET'
+signature_verifier = SignatureVerifier(signing_secret)
 
-# Rota para receber as solicitações do Slack
-@flask_app.route("/slack/events", methods=["POST"])
+@app.route('/slack/events', methods=['POST'])
 def slack_events():
-    # Obter a solicitação do Slack
-    slack_request = handler.handle(request)
+    if not signature_verifier.is_valid_request(request.get_data().decode('utf-8'), request.headers):
+        return make_response("Invalid request", 403)
 
-    # Verificar se a solicitação contém um challenge
-    if slack_request.body.get("challenge"):
-        challenge = slack_request.body["challenge"]
-        return jsonify({"challenge": challenge})
+    data = json.loads(request.data.decode('utf-8'))
 
-    # Confirmar o recebimento do evento
-    return jsonify(), 200
+    # Responda ao desafio HTTP do Slack
+    if 'challenge' in data:
+        return make_response(data['challenge'], 200, {"content_type": "application/json"})
 
-# Manipulador de eventos
-@app.event("app_mention")
-def handle_app_mention(event, say):
-    channel_id = event["channel"]
+    if 'event' in data:
+        event_data = data['event']
 
-    # Enviar a resposta
-    say("Olá! Tudo bem?")
+        # Responda a menções com "Oi, tudo bem?"
+        if 'type' in event_data and event_data['type'] == 'app_mention':
+            channel = event_data['channel']
+            try:
+                response = client.chat_postMessage(channel=channel, text='Oi, tudo bem?')
+            except SlackApiError as e:
+                print(f"Error: {e}")
+
+    return make_response("", 200)
 
 if __name__ == "__main__":
-    # Iniciar o servidor do Flask usando o Gunicorn
-    http_server = WSGIServer(("0.0.0.0", 3000), flask_app)
-    http_server.serve_forever()
+    app.run(port=3000)
 
 
 
