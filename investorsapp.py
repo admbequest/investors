@@ -2,6 +2,7 @@ import os
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request, jsonify
+from gevent.pywsgi import WSGIServer
 
 # Criar o objeto de aplicativo Flask
 flask_app = Flask(__name__)
@@ -35,13 +36,13 @@ def handle_app_mention(event, say):
     say("Olá! Tudo bem?")
 
 # Função para retornar o aplicativo WSGI
-def create_wsgi_app(environ, start_response):
+def create_wsgi_app():
     return flask_app
 
 if __name__ == "__main__":
     # Iniciar o servidor do Flask usando o Gunicorn
-    app.run(host="0.0.0.0", port=3000)
-
+    http_server = WSGIServer(("0.0.0.0", 3000), create_wsgi_app())
+    http_server.serve_forever()
 
 
 
