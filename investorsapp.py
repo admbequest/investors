@@ -35,12 +35,13 @@ def handle_app_mention(event, say):
     say("Olá! Tudo bem?")
 
 # Função para retornar o aplicativo WSGI
-def create_wsgi_app():
+def create_wsgi_app(environ, start_response):
     return flask_app
 
 if __name__ == "__main__":
     # Iniciar o servidor do Flask usando o Gunicorn
     app.run(host="0.0.0.0", port=3000)
+
 
 
 
