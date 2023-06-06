@@ -34,6 +34,22 @@ def handle_app_mention(event, say):
     # Enviar a resposta
     say("Olá! Tudo bem?")
 
+# Criar o objeto Gunicorn
+gunicorn_app = app.wsgi_app
+
+if __name__ == "__main__":
+    # Iniciar o servidor do Flask usando o Gunicorn
+    flask_app.run(host="0.0.0.0", port=3000)
+
+
+# Manipulador de eventos
+@app.event("app_mention")
+def handle_app_mention(event, say):
+    channel_id = event["channel"]
+
+    # Enviar a resposta
+    say("Olá! Tudo bem?")
+
 if __name__ == "__main__":
     # Iniciar o servidor do Flask
     flask_app.run(host="0.0.0.0", port=3000)
