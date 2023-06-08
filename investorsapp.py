@@ -16,8 +16,10 @@ app = Flask(__name__)
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     # Verifique a assinatura do Slack.
-    if not signature_verifier.is_valid(request.get_data(), request.headers):
-        return make_response("invalid request", 403)
+    timestamp = request.headers.get('X-Slack-Request-Timestamp')
+    signature = request.headers.get('X-Slack-Signature')
+    if not signature_verifier.is_valid(body=request.get_data().decode('utf-8'), timestamp=timestamp, signature=signature):
+        return make_response("Invalid request", 403)
 
     # Pegue o evento do payload do Slack.
     slack_event = request.json
