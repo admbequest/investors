@@ -2,6 +2,11 @@ from flask import Flask, request, make_response
 from slack_sdk import WebClient
 from slack_sdk.signature import SignatureVerifier
 
+# Use o token do seu bot aqui
+SLACK_BOT_TOKEN = "SLACK_BOT_TOKEN"
+# Use o signing secret do seu aplicativo aqui
+SLACK_SIGNING_SECRET = "SLACK_SIGNING_SECRET"
+
 # Tokens do aplicativo Slack.
 client = WebClient(token=SLACK_BOT_TOKEN)
 signature_verifier = SignatureVerifier(SLACK_SIGNING_SECRET)
